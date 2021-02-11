@@ -47,6 +47,7 @@
             $homePagePosts = new WP_Query(array(
               "posts_per_page" => 2,
             ));
+
             while($homePagePosts->have_posts()){
               $homePagePosts->the_post();
               
@@ -65,7 +66,7 @@
             // we have to reset post data after using custom query
            wp_reset_postdata(); ?>
 
-          <p class="t-center no-margin"><a href="#" class="btn btn--yellow">View All Blog Posts</a></p>
+          <p class="t-center no-margin"><a href="<?php echo site_url('/index.php/blog'); ?>" class="btn btn--yellow">View All Blog Posts</a></p>
         </div>
       </div>
     </div>
