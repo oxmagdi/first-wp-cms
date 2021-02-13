@@ -23,6 +23,37 @@
 	<?php the_content(); ?>
 
     <?php 
+
+             $relatedProfessors = new WP_Query(array(
+              "post_type" => "professor",
+              "orderby" => "title",
+              "order" => "ASC",
+              "meta_query" => array(
+                array(
+                  "key" => "related_programs",
+                  "compare" => "LIKE",
+                  "value" => '"'. get_the_ID() .'"',
+                ),
+              ),
+            ));
+
+      if($relatedProfessors->have_posts()){
+            echo "<hr class='section-break' />";
+            echo "<h1 class='headline headline--medium' >Upcoming ". get_the_title() ." Event</h2>";
+
+            while ($relatedProfessors->have_posts()) {
+              # code...
+              $relatedProfessors->the_post();
+    ?>
+          <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+
+    <?php 
+              } /* End relatedProfessors loop */
+            
+        } /* End relatedProfessors if condetion */
+
+            wp_reset_postdata();  
+            
             $today = date("Ymd");
             $upcomingEvents = new WP_Query(array(
               "posts_per_page" => 2,
@@ -71,10 +102,10 @@
                 } ?>. <a href="<?php the_permalink(); ?>" class="nu gray">Learn more</a></p>
             </div>
           </div>
-          <?php } /* wp_reset_postdata(); */ 
-      }
+          <?php }  /* End upcomingEvents loop */
+      } /* End upcomingEvents if condetion */
     ?>
 
   </div>
 
-<?php } get_footer();?>
+<?php } get_footer(); ?>
