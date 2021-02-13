@@ -3,7 +3,7 @@
   <div class="page-banner">
     <div class="page-banner__bg-image" style="background-image: url(images/ocean.jpg);"></div>
     <div class="page-banner__content container container--narrow">
-      <h1 class="page-banner__title">All Events</h1>
+      <h1 class="page-banner__title">Past Events</h1>
       <div class="page-banner__intro">
         <p>See what is going on in our world.</p>
       </div>
@@ -13,15 +13,32 @@
   <div class="container container--narrow page-section">
           <?php 
 
-            while (have_posts()) {
+          	$today = date("Ymd");
+            $pastPageEvents = new WP_Query(array(
+              "paged" => get_query_var("paged", 1),
+              "post_type" => "event",
+              "meta_key" => "event_date",
+              "orderby" => "meta_value_num",
+              "order" => "ASC",
+              "meta_query" => array(
+                array(
+                  "key" => "event_date",
+                  "compare" => "<",
+                  "value" => $today,
+                  "type" => "numeric",
+                ),
+              ),
+            ));
+
+            while ($pastPageEvents->have_posts()) {
               # code...
-              the_post();
+              $pastPageEvents->the_post();
           ?>
           <div class="event-summary">
             <a class="event-summary__date t-center" href="#">
               <span class="event-summary__month"><?php 
                 $date = DateTime::createFromFormat('d/m/Y', get_field('event_date'));
-               echo $date->format("M");
+               	echo $date->format("M");
               ?></span>
               <span class="event-summary__day"><?php echo $date->format("d"); ?></span>
             </a>
@@ -31,11 +48,10 @@
             </div>
           </div>
           <?php }  
-            echo paginate_links(); 
+            echo paginate_links(array(
+            	"total" => $pastPageEvents->max_num_pages,
+            )); 
           ?>
-
-          <hr class="section-break">
-          <p>Looking for a recap of past event ? <a href="<?php echo site_url('/index.php/past-events'); ?>">Check out our past events archive.</a></p>
   </div>
 
 <?php get_footer(); ?>
