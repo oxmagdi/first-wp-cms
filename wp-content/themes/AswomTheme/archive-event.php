@@ -19,8 +19,11 @@
           ?>
           <div class="event-summary">
             <a class="event-summary__date t-center" href="#">
-              <span class="event-summary__month"><?php the_time('D'); ?></span>
-              <span class="event-summary__day"><?php the_time('j'); ?></span>
+              <span class="event-summary__month"><?php 
+                $date = DateTime::createFromFormat('d/m/Y', get_field('event_date'));
+               echo $date->format("M");
+              ?></span>
+              <span class="event-summary__day"><?php echo $date->format("d"); ?></span>
             </a>
             <div class="event-summary__content">
               <h5 class="event-summary__title headline headline--tiny"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h5>
