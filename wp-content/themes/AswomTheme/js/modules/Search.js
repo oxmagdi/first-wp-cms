@@ -1,4 +1,4 @@
-import $, { post } from 'jquery';
+import $ from 'jquery';
 
 class Search {
   // 1. describe and create/initiate our object
