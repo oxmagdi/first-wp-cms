@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 function university_post_types(){
     // Event post type  
@@ -35,6 +35,7 @@ function university_post_types(){
 
 	 // Professor post type  
 	register_post_type('professor', array(
+		'show_in_rest' => true,
 		'supports' => array('title', 'editor', 'thumbnail'),
 		'public' => true,
 		'menu_icon' => 'dashicons-welcome-learn-more',
