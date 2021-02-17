@@ -54,26 +54,13 @@ class Search {
       this.resultsDiv.html(`
         <h1 class="search-overlay__section-title">Genral Information</h1>
         ${combinedResults.length ? '<ul class="link-list min-list">' : '<p>No genral information matches that search</p>'}
-          ${combinedResults.map(post => `<li><a href="${post['link']}">${post['title']['rendered']}</a></li>`).join('')}
+          ${combinedResults.map(item => `<li><a href="${item['link']}">${item['title']['rendered']}</a> ${item.type == 'post' ? `By ${item['authorName']}` : ''}</li>`).join('')}
       ${combinedResults.length ? '</ul>' : ''}
       `);
 
       this.isSpinnerVisible = false;
     }, () => {
       this.resultsDiv.html('<p>Unexpected error; please try agian</p>');
-    });
-
-
-    $.getJSON(`${universityData.root_url}/index.php/wp-json/wp/v2/posts?search=${this.searchField.val()}`, posts => {
-      // alert(posts[0]['title']['rendered']);
-      this.resultsDiv.html(`
-            <h1 class="search-overlay__section-title">Genral Information</h1>
-            ${posts.length ? '<ul class="link-list min-list">' : '<p>No genral information matches that search</p>'}
-              ${posts.map(post => `<li><a href="${post['link']}">${post['title']['rendered']}</a></li>`).join('')}
-            ${posts.length ? '</ul>' : ''}
-      `);
-
-      this.isSpinnerVisible = false;
     });
   }
 
