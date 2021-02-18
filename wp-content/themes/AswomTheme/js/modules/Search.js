@@ -46,22 +46,54 @@ class Search {
   }
 
   getResults() {
-    $.when(
-      $.getJSON(`${universityData.root_url}/index.php/wp-json/wp/v2/posts?search=${this.searchField.val()}`),
-      $.getJSON(`${universityData.root_url}/index.php/wp-json/wp/v2/pages?search=${this.searchField.val()}`),
-    ).then((posts, pages) => {
-      var combinedResults = posts[0].concat(pages[0]);
-      this.resultsDiv.html(`
-        <h1 class="search-overlay__section-title">Genral Information</h1>
-        ${combinedResults.length ? '<ul class="link-list min-list">' : '<p>No genral information matches that search</p>'}
-          ${combinedResults.map(item => `<li><a href="${item['link']}">${item['title']['rendered']}</a> ${item.type == 'post' ? `By ${item['authorName']}` : ''}</li>`).join('')}
-      ${combinedResults.length ? '</ul>' : ''}
-      `);
 
-      this.isSpinnerVisible = false;
-    }, () => {
-      this.resultsDiv.html('<p>Unexpected error; please try agian</p>');
+    $.getJSON(`${universityData.root_url}/index.php/wp-json/university/v1/search?term=${this.searchField.val()}`, results => {
+      console.log(results)
+      this.resultsDiv.html(`
+            <div class="row">
+              <div class="one-third">
+                    <h1 class="search-overlay__section-title">Genral Information</h1>
+                    ${results.genralInfo.length ? '<ul class="link-list min-list">' : '<p>No genral information matches that search</p>'}
+                        ${results.genralInfo.map(item => `<li><a href="${item.permalink}">${item.title}</a> ${item.type == 'post' ? `By ${item.authorName}` : ''}</li>`).join('')}
+                    ${results.genralInfo.length ? '</ul>' : ''}
+              </div>
+              <div class="one-third">
+                    <h1 class="search-overlay__section-title">Programs</h1>
+                    ${results.programs.length ? '<ul class="professor-cards">' : '<p>No programs match that search</p>'}
+                        ${results.programs.map(item => `<li><a href="${item.permalink}">${item.title}</a></li>`).join('')}
+                    ${results.programs.length ? '</ul>' : ''}
+                    <h1 class="search-overlay__section-title">Professors</h1>
+                    ${results.professors.length ? '<ul class="link-list min-list">' : '<p>No professors match that search</p>'}
+                        ${results.professors.map(item => `
+                        <li class="professor-card__list-item">
+                          <a class="professor-card" href="${item.permalink}">
+                            <img src="${item.image}" alt="" class="professor-card__image">
+                            <span class="professor-card__name">${item.title}</span>
+                          </a>
+                        </li>
+                        `).join('')}
+                    ${results.professors.length ? '</ul>' : ''}
+              </div>
+              <div class="one-third">
+                    <h1 class="search-overlay__section-title">Events</h1>
+                    ${results.events.length ? '' : '<p>No events match that search</p>'}
+                        ${results.events.map(item => `
+                        <div class="event-summary">
+                            <a class="event-summary__date t-center" href="${item.permalink}">
+                                <span class="event-summary__month">${item.month}</span>
+                                <span class="event-summary__day">${item.day}</span>
+                            </a>
+                            <div class="event-summary__content">
+                                <h5 class="event-summary__title headline headline--tiny"><a href="${item.permalink}">${item.title}</a></h5>
+                                <p>${item.description}. <a href="${item.permalink}" class="nu gray">Learn more</a></p>
+                            </div>
+                        </div>
+                        `).join('')}
+              </div>
+            </div>
+        `);
     });
+    this.isSpinnerVisible = false;
   }
 
   keyPressdispatcher(e) {

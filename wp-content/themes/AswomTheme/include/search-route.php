@@ -12,6 +12,13 @@
  function universitySearchResults($data){
     // for little bit securty sanitize term 
     $term = sanitize_text_field($data['term']);
+    
+    $results = array(
+        'genralInfo' => array(),
+        'programs' => array(),
+        'events' => array(),
+        'professors' => array(),
+    );
 
     $mainQuery = new WP_Query(array(
         // searching on multiple post type 
@@ -19,12 +26,6 @@
         's' => $term,
     )); 
 
-    $results = array(
-        'genralInfo' => array(),
-        'programs' => array(),
-        'events' => array(),
-        'professors' => array(),
-    );
     while($mainQuery->have_posts()){
         $mainQuery->the_post();
 
@@ -32,7 +33,8 @@
             array_push($results['genralInfo'], array(
                 'title' => get_the_title(),
                 'permalink' => get_the_permalink(),
-                // 'title' => get_the_title(),
+                'type' => get_post_type(),
+                'authorName' => get_the_author(),
             ));
         }
 
@@ -40,7 +42,7 @@
             array_push($results['professors'], array(
                 'title' => get_the_title(),
                 'permalink' => get_the_permalink(),
-                // 'title' => get_the_title(),
+                'image' => get_the_post_thumbnail_url(0, 'professorLabscape'),
             ));
         }
 
@@ -48,18 +50,80 @@
             array_push($results['programs'], array(
                 'title' => get_the_title(),
                 'permalink' => get_the_permalink(),
-                // 'title' => get_the_title(),
+                'id' => get_the_ID(),
             ));
         }
 
         if(get_post_type() == 'event'){
+            $eventDate = DateTime::createFromFormat('d/m/Y', get_field('event_date'));
+            $description = null;
+
+            if(has_excerpt()){
+                $description = get_the_excerpt();
+            } else {
+                $description = wp_trim_words(get_the_content(), 18);
+            }
+
             array_push($results['events'], array(
                 'title' => get_the_title(),
                 'permalink' => get_the_permalink(),
-                // 'title' => get_the_title(),
+                'month' => $eventDate->format("M"),
+                'day' => $eventDate->format("d"),
+                'description' => $description,
             ));
         }
     }
+
+    // wp_reset_postdata();
+    if ($results['programs']) {
+        $programsMetaQuery = array('relation' => "OR", );
+        foreach ($results['programs'] as $program) {
+            array_push($programsMetaQuery,  array(
+                "key" => "related_programs",
+                 "compare" => "LIKE",
+                 "value" => '"'. $program['id'] .'"',
+             ),);
+        }
+        $programsRelationshipQuery = new WP_Query(array(
+            "post_type" => array("professor", "event"),
+            "meta_query" => $programsMetaQuery,
+        ));
+    
+        while($programsRelationshipQuery->have_posts()){
+            $programsRelationshipQuery->the_post();
+    
+            if(get_post_type() == 'professor' ){
+                array_push($results['professors'], array(
+                    'title' => get_the_title(),
+                    'permalink' => get_the_permalink(),
+                    'image' => get_the_post_thumbnail_url(0, 'professorLabscape'),
+                ));
+            }
+
+            if(get_post_type() == 'event'){
+                $eventDate = DateTime::createFromFormat('d/m/Y', get_field('event_date'));
+                $description = null;
+
+                if(has_excerpt()){
+                    $description = get_the_excerpt();
+                } else {
+                    $description = wp_trim_words(get_the_content(), 18);
+                }
+
+                array_push($results['events'], array(
+                    'title' => get_the_title(),
+                    'permalink' => get_the_permalink(),
+                    'month' => $eventDate->format("M"),
+                    'day' => $eventDate->format("d"),
+                    'description' => $description,
+                ));
+            }
+        }
+    
+        $results['professors'] = array_unique($results['professors'], SORT_REGULAR);
+        $results['events'] = array_unique($results['events'], SORT_REGULAR);
+    }
+
     return $results;
  }
 
